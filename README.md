@@ -18,11 +18,11 @@
 - Min Stake: 48h
 - Premine 3% 1.5M
 - POS REWARDS:
-    -- From block 1 to  100000 : 10 MNB
-    -- From block 100001 to 200000 : 20 MNB
-    -- From block 200001 to end : 50 MNB
+    - From block 1 to  100000 : 10 MNB
+    - From block 100001 to 200000 : 20 MNB
+    - From block 200001 to end : 50 MNB
 - POW REWARDS:
-    -- From block 1 to  100 : 0 MNB (AntiInstamine)
-    -- From block 100 to  100000 : 50 MNB
-    -- From block 100.001 to 250000 : 25 MNB
+    - From block 1 to  100 : 0 MNB (AntiInstamine)
+    - From block 100 to  100000 : 50 MNB
+    - From block 100.001 to 250000 : 25 MNB
 - Min TX Fee: 0.0001 MNB
