@@ -1153,19 +1153,41 @@ int64_t GetProofOfWorkReward(int64_t nFees, int nHeight)
     return nSubsidy + nFees;
 }
 
+// - POS BLOCKS REWARDS:
+//     - From block 1 to  20000 : 10 MNB
+//     - From block 15001 to 40000 : 20 MNB
+//     - From block 40001 to 80000 : 40 MNB
+//     - From block 80001 to 110000 : 60 MNB
+//     - From block 110001 to 155000 : 80 MNB
+//     - From block 155001 to 250000 : 40 MNB
+//     - From block 250001 to end : 20 MNB
+
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 {
     int64_t nSubsidy = 0 * COIN;
     if (pindexBest->nMoneySupply < MAX_MONEY){
-        if(pindexBest->nHeight > 100000)
+       
+       if(pindexBest->nHeight <= 20000)
+        {
+            nSubsidy = 10 * COIN;
+        }else if(pindexBest->nHeight <= 40000)
         {
             nSubsidy = 20 * COIN;
-        }else if(pindexBest->nHeight > 200000)
+        }else if(pindexBest->nHeight <= 80000)
         {
-            nSubsidy = 50 * COIN;
+            nSubsidy = 40 * COIN;
+        }else if(pindexBest->nHeight <= 110000)
+        {
+            nSubsidy = 60 * COIN;
+        }else if(pindexBest->nHeight <= 155000)
+        {
+            nSubsidy = 80 * COIN;
+        }else if(pindexBest->nHeight <= 250000)
+        {
+            nSubsidy = 40 * COIN;
         }else{
-          nSubsidy = 10 * COIN;  
+          nSubsidy = 20 * COIN;  
         }
     }
 
@@ -1244,8 +1266,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (nActualSpacing < 0)
         nActualSpacing = nTargetSpacing;
 
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
+    // target change every block
+    // retarget with exponential moving toward target spacing
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
     int64_t nInterval = nTargetTimespan / nTargetSpacing;

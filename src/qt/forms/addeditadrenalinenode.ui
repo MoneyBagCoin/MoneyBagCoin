@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>241</height>
+    <width>608</width>
+    <height>328</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1) Synchronized your local wallet. 2) In the Alias field, write any name your MoneyBagNode. 3) In the Address field, your external IP address : port P2P (default 43210) click OK. 4) Click button “Copy address“ and Send to the address received 30000 MNB. 5) Click button “Get Config” and copy the contents. 6) Create a file named MoneyBagCoin.Conf(C:\Users\User\Appdata\Roaming\MoneyBagCoin) 7) Replace the rpcuser, rpcpass and port field. 8) Restart the wallet and press button ”Start” your MoneyBagNode .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1) Synchronized your local wallet. &lt;br/&gt;2) In the Alias field, write any name your MoneyBagNode.&lt;br/&gt;3) In the Address field, your external IP address : port P2P (default 43210) click OK. &lt;br/&gt;4) Click button “Copy address“ and Send to the address received 30000 MNB. 5) Click button “Get Config” and copy the contents. &lt;br/&gt;6) Create a file named MoneyBagCoin.Conf (C:\Users\User\Appdata\Roaming\MoneyBagCoin) &lt;br/&gt;7) Replace the rpcuser, rpcpass and port field. &lt;br/&gt;8) Restart the wallet and press button ”Start” your MoneyBagNode .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
