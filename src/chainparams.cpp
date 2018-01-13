@@ -95,6 +95,16 @@ class CMainParams : public CChainParams
         vSeeds.push_back(CDNSSeedData("n1", "5.189.152.63"));
         vSeeds.push_back(CDNSSeedData("n2", "173.249.7.89"));
         vSeeds.push_back(CDNSSeedData("n3", "138.68.68.149"));
+        vSeeds.push_back(CDNSSeedData("n4", "35.197.91.231"));
+        vSeeds.push_back(CDNSSeedData("n5", "147.135.130.119"));
+        vSeeds.push_back(CDNSSeedData("n6", "1.33.247.11:64765"));
+        vSeeds.push_back(CDNSSeedData("n7", "1.54.213.25:25387"));
+        vSeeds.push_back(CDNSSeedData("n8", "103.1.239.208:57179"));
+        vSeeds.push_back(CDNSSeedData("n9", "103.233.194.202:60560"));
+        vSeeds.push_back(CDNSSeedData("n10", "103.71.237.15:41447"));
+        vSeeds.push_back(CDNSSeedData("n11", "104.155.199.216:53706"));
+        vSeeds.push_back(CDNSSeedData("n12", "80.79.194.65:57371"));
+
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 51);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 5);
