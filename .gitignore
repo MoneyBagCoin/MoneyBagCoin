@@ -1,0 +1,6 @@
+
+MoneyBagCoin.app
+Makefile
+*.o
+*.mk
+*.a
