@@ -425,7 +425,9 @@ void BitcoinGUI::createToolBars()
     toolbar->addWidget(spacer);
     toolbar->setOrientation(Qt::Vertical);
     toolbar->setMovable(false);
-
+    for(int i=0;i<toolbar->layout()->count();i++){
+        toolbar->layout()->itemAt(i)->setAlignment(Qt::AlignLeft);
+    }
     addToolBar(Qt::LeftToolBarArea, toolbar);
 }
 
