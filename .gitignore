@@ -5,3 +5,4 @@ Makefile
 *.mk
 *.a
 src/qt/res/icons/Thumbs.db
+qrc_bitcoin.cpp
