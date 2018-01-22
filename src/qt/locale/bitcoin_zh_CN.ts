@@ -2820,8 +2820,8 @@ alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+65"/>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 15715 or testnet: 25715)</source>
-        <translation>监听 &lt;port&gt; 端口的JSON-RPC连接 (默认: 15715 测试网: 25715)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 43211 or testnet: 43213)</source>
+        <translation>监听 &lt;port&gt; 端口的JSON-RPC连接 (默认: 43211 测试网: 43213)</translation>
     </message>
     <message>
         <location line="-17"/>

@@ -2806,7 +2806,7 @@ for example: alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin
     </message>
     <message>
         <location line="+65"/>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 15715 or testnet: 25715)</source>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 43211 or testnet: 43213)</source>
         <translation>Sprejmi povezave na &lt;port&gt; (privzeta vrata: 43210 ali testnet: 43212) </translation>
     </message>
     <message>

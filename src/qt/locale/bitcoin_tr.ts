@@ -2813,8 +2813,8 @@ for example: alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin
     </message>
     <message>
         <location line="+65"/>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 15715 or testnet: 25715)</source>
-        <translation>&lt;port&gt; üzerinde JSON-RPC bağlantılarını dinle (varsayılan: 15715 veya testnet: 25715)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 43211 or testnet: 43213)</source>
+        <translation>&lt;port&gt; üzerinde JSON-RPC bağlantılarını dinle (varsayılan: 43211 veya testnet: 43213)</translation>
     </message>
     <message>
         <location line="-17"/>
