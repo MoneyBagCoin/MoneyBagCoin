@@ -2763,13 +2763,13 @@ for example: alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin
     </message>
     <message>
         <location line="+6"/>
-        <source>Listen for connections on &lt;port&gt; (default: 15714 or testnet: 25714)</source>
-        <translation>&lt;port&gt; üzerinde bağlantıları dinle (varsayılan: 15714 veya testnet: 25714)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 43210 or testnet: 43212)</source>
+        <translation>&lt;port&gt; üzerinde bağlantıları dinle (varsayılan: 43210 veya testnet: 43212)</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
-        <translation>Eşler ile en çok &lt;n&gt; adet bağlantı kur (varsayılan: 125)</translation>
+        <source>Maintain at most &lt;n&gt; connections to peers (default: 250)</source>
+        <translation>Eşler ile en çok &lt;n&gt; adet bağlantı kur (varsayılan: 250)</translation>
     </message>
     <message>
         <location line="+3"/>

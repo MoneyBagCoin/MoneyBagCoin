@@ -2745,13 +2745,13 @@ for example: alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin
     </message>
     <message>
         <location line="+6"/>
-        <source>Listen for connections on &lt;port&gt; (default: 15714 or testnet: 25714)</source>
-        <translation>Принимать входящие подключения на &lt;port&gt; (по умолчанию: 15714 или 25714 в тестовой сети)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 43210 or testnet: 43212)</source>
+        <translation>Принимать входящие подключения на &lt;port&gt; (по умолчанию: 43210 или 25714 в тестовой сети)</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
-        <translation>Поддерживать не более &lt;n&gt; подключений к узлам (по умолчанию: 125)</translation>
+        <source>Maintain at most &lt;n&gt; connections to peers (default: 250)</source>
+        <translation>Поддерживать не более &lt;n&gt; подключений к узлам (по умолчанию: 250)</translation>
     </message>
     <message>
         <location line="+3"/>

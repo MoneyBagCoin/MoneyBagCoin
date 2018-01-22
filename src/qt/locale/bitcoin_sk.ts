@@ -2772,13 +2772,13 @@ napríklad: alertnotify=echo %%s | mail -s &quot;MoneyBagCoin upozornenie&quot; 
     </message>
     <message>
         <location line="+6"/>
-        <source>Listen for connections on &lt;port&gt; (default: 15714 or testnet: 25714)</source>
-        <translation>Počúvať pripojenia na &lt;port&gt; (predvolené: 15714 alebo testovacia sieť: 25714)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 43210 or testnet: 43212)</source>
+        <translation>Počúvať pripojenia na &lt;port&gt; (predvolené: 43210 alebo testovacia sieť: 43212)</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
-        <translation>Udržiavať maximálne &lt;n&gt; spojení (predvolené: 125)</translation>
+        <source>Maintain at most &lt;n&gt; connections to peers (default: 250)</source>
+        <translation>Udržiavať maximálne &lt;n&gt; spojení (predvolené: 250)</translation>
     </message>
     <message>
         <location line="+3"/>

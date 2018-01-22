@@ -2770,13 +2770,13 @@ alertnotify=echo %%s | mail -s &quot;MoneyBagCoin Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+6"/>
-        <source>Listen for connections on &lt;port&gt; (default: 15714 or testnet: 25714)</source>
-        <translation>监听&lt;port&gt;端口的连接 (默认: 15714 测试网: 25714)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 43210 or testnet: 43212)</source>
+        <translation>监听&lt;port&gt;端口的连接 (默认: 43210 测试网: 43212)</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
-        <translation>最大连接数 &lt;n&gt; （缺省: 125）</translation>
+        <source>Maintain at most &lt;n&gt; connections to peers (default: 250)</source>
+        <translation>最大连接数 &lt;n&gt; （缺省: 250）</translation>
     </message>
     <message>
         <location line="+3"/>
