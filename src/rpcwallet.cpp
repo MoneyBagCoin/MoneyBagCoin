@@ -1004,7 +1004,7 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
                     entry.push_back(Pair("amount", ValueFromAmount(r.second)));
                 else
                 {
-                    entry.push_back(Pair("amount", ValueFromAmount(-nFee)));
+                    entry.push_back(Pair("amount", ValueFromAmount(r.second)));
                     stop = true; // only one coinstake output
                 }
                 if (fLong)

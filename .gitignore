@@ -4,3 +4,4 @@ Makefile
 *.o
 *.mk
 *.a
+src/qt/res/icons/Thumbs.db

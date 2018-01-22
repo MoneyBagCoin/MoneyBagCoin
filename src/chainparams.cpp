@@ -13,8 +13,7 @@
 
 using namespace boost::assign;
 
-struct SeedSpec6
-{
+struct SeedSpec6 {
     uint8_t addr[16];
     uint16_t port;
 };
@@ -32,7 +31,7 @@ static void convertSeed6(std::vector<CAddress> &vSeedsOut, const SeedSpec6 *data
     // it'll get a pile of addresses with newer timestamps.
     // Seed nodes are given a random 'last seen time' of between one and two
     // weeks ago.
-    const int64_t nOneWeek = 7 * 24 * 60 * 60;
+    const int64_t nOneWeek = 7*24*60*60;
     for (unsigned int i = 0; i < count; i++)
     {
         struct in6_addr ip;
@@ -43,11 +42,9 @@ static void convertSeed6(std::vector<CAddress> &vSeedsOut, const SeedSpec6 *data
     }
 }
 
-class CMainParams : public CChainParams
-{
-  public:
-    CMainParams()
-    {
+class CMainParams : public CChainParams {
+public:
+    CMainParams() {
         // The message start string is designed to be unlikely to occur in normal data.
         // The characters are rarely used upper ASCII, not valid as UTF-8, and produce
         // a large 4-byte int at any alignment.
@@ -91,19 +88,30 @@ class CMainParams : public CChainParams
         assert(hashGenesisBlock == uint256("0xecfb30eee1a53f304655e41022a6f6617922ad7faf84e1f1caacd315d303bbd8"));
         assert(genesis.hashMerkleRoot == uint256("0x2c473a492c11295d578a2f2409cb0401adf031bd29a5e963e38c2b55a3c16052"));
 
-        vSeeds.push_back(CDNSSeedData("n0", "82.36.184.73"));
-        vSeeds.push_back(CDNSSeedData("n1", "5.189.152.63"));
-        vSeeds.push_back(CDNSSeedData("n2", "173.249.7.89"));
-        vSeeds.push_back(CDNSSeedData("n3", "138.68.68.149"));
-        vSeeds.push_back(CDNSSeedData("n4", "35.197.91.231"));
-        vSeeds.push_back(CDNSSeedData("n5", "147.135.130.119"));
-        vSeeds.push_back(CDNSSeedData("n6", "1.33.247.11:64765"));
-        vSeeds.push_back(CDNSSeedData("n7", "1.54.213.25:25387"));
-        vSeeds.push_back(CDNSSeedData("n8", "103.1.239.208:57179"));
-        vSeeds.push_back(CDNSSeedData("n9", "103.233.194.202:60560"));
-        vSeeds.push_back(CDNSSeedData("n10", "103.71.237.15:41447"));
-        vSeeds.push_back(CDNSSeedData("n11", "104.155.199.216:53706"));
-        vSeeds.push_back(CDNSSeedData("n12", "80.79.194.65:57371"));
+        vSeeds.push_back(CDNSSeedData("n0", "82.36.184.73:43210"));
+        vSeeds.push_back(CDNSSeedData("n1", "5.189.152.63:43210"));
+        vSeeds.push_back(CDNSSeedData("n2", "173.249.7.89:43210"));
+        vSeeds.push_back(CDNSSeedData("n3", "138.68.68.149:43210"));
+        vSeeds.push_back(CDNSSeedData("explorer", "35.197.91.231:43210"));
+         vSeeds.push_back(CDNSSeedData("node-1", "35.205.164.239:43210"));
+        vSeeds.push_back(CDNSSeedData("n3", "35.197.91.231:43210"));
+        vSeeds.push_back(CDNSSeedData("n4", "147.135.130.119:43210"));
+        vSeeds.push_back(CDNSSeedData("n5", "1.33.247.11:64765"));
+        vSeeds.push_back(CDNSSeedData("n6", "1.54.213.25:25387"));
+        vSeeds.push_back(CDNSSeedData("n7", "103.1.239.208:57179"));
+        vSeeds.push_back(CDNSSeedData("n8", "103.233.194.202:60560"));
+        vSeeds.push_back(CDNSSeedData("n9", "103.71.237.15:41447"));
+        vSeeds.push_back(CDNSSeedData("n10", "104.155.199.216:53706"));
+        vSeeds.push_back(CDNSSeedData("n11", "80.79.194.65:57371"));
+        vSeeds.push_back(CDNSSeedData("n12", "104.155.199.216:55016"));
+        vSeeds.push_back(CDNSSeedData("n13", "109.248.46.56:58755"));
+        vSeeds.push_back(CDNSSeedData("n14", "111.239.150.36:61563"));
+        vSeeds.push_back(CDNSSeedData("n15", "113.190.122.28:58802"));
+        vSeeds.push_back(CDNSSeedData("n16", "115.132.163.13:56704"));
+        vSeeds.push_back(CDNSSeedData("n17", "115.77.245.105:54707"));
+        vSeeds.push_back(CDNSSeedData("n18", "119.59.115.39:59605"));
+        vSeeds.push_back(CDNSSeedData("n18", "119.59.115.39:59605"));
+        vSeeds.push_back(CDNSSeedData("n20", "119.59.115.40:43210"));
 
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 51);

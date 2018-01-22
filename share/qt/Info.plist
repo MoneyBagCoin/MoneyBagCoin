@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>MoneyBagCoin.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.MoneyBagCoin-Qt</string>
+	<string>com.moneybagcoin.MoneyBagCoin-Qt</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
