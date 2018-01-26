@@ -1,20 +1,20 @@
 ##################################  Notes  ##################################
 # build:
-#   docker build --no-cache -t coinonatx .
+#   docker build --no-cache -t moneybagcoin .
 #
 # run:
-#   docker run -it -p 15015:15015 coinonatx
+#   docker run -it -p 15015:15015 moneybagcoin
 #
 # run with a mounted directory for ~/.MoneyBagCoin:
-#   docker run -it -p 15015:15015 -v /path/to/a/local/directory:/root/.MoneyBagCoin coinonatx
+#   docker run -it -p 15015:15015 -v /path/to/a/local/directory:/root/.MoneyBagCoin moneybagcoin
 #
 # run will exec you into docker /bin/bash
 # from there, you can run:
-# coinontaxd # starts the coinontax deamon
+# moneybagcoind # starts the moneybagcoin deamon
 #
-# For accessing the coinonatx JSON-RPC api from the host:
+# For accessing the moneybagcoin JSON-RPC api from the host:
 # 1. Expose RPC port in when running docker
-#    docker run -it -p 15015:15015 -p 5000:XXX -v /path/to/a/local/directory:/root/.MoneyBagCoin coinonatx # Replace XXX with set rpcPort in coinontax.conf
+#    docker run -it -p 15015:15015 -p 5000:XXX -v /path/to/a/local/directory:/root/.MoneyBagCoin moneybagcoin # Replace XXX with set rpcPort in moneybagcoin.conf
 # 2. From host access the API via:
 # `curl --user rpc_user:rpc_pass --data '{"method": "getinfo"}' http://127.0.0.1:5000`
 #############################################################################
@@ -35,7 +35,7 @@ RUN apt-get -y --allow-unauthenticated install libdb4.8-dev libdb4.8++-dev
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/coinonat/MoneyBagCoin.git MoneyBagCoin && cd MoneyBagCoin/src/ && make -f makefile.unix && cp moneybagcoind /usr/local/sbin/moneybagcoind
+RUN git clone https://github.com/MoneyBagCoin/MoneyBagCoin.git MoneyBagCoin && cd MoneyBagCoin/src/ && make -f makefile.unix && cp moneybagcoind /usr/local/sbin/moneybagcoind
 
 RUN mkdir /root/.MoneyBagCoin/
 
