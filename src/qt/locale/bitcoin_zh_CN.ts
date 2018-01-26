@@ -1815,7 +1815,7 @@ This label turns red, if the priority is smaller than &quot;medium&quot;.
     <message>
         <location filename="../sendcoinsdialog.cpp" line="-173"/>
         <source>Enter a MoneyBagCoin address (e.g. MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</source>
-        <translation>输入黑币地址(例如：CKPnZKDzaDXqEgKJ4GdUg58gXxgzA7mkny)</translation>
+        <translation>输入黑币地址(例如：MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -1948,7 +1948,7 @@ This label turns red, if the priority is smaller than &quot;medium&quot;.
     <message>
         <location line="+34"/>
         <source>The address to send the payment to (e.g. MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</source>
-        <translation>收款人地址(例：CKPnZKDzaDXqEgKJ4GdUg58gXxgzA7mkny)</translation>
+        <translation>收款人地址(例：MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</translation>
     </message>
     <message>
         <location line="+60"/>
@@ -1989,7 +1989,7 @@ This label turns red, if the priority is smaller than &quot;medium&quot;.
     <message>
         <location filename="../sendcoinsentry.cpp" line="+1"/>
         <source>Enter a MoneyBagCoin address (e.g. MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</source>
-        <translation>输入一个黑币地址 (例：CKPnZKDzaDXqEgKJ4GdUg58gXxgzA7mkny)</translation>
+        <translation>输入一个黑币地址 (例：MrBD1wq3nSdpefyQXhLQuXQWAk7Jd7o474)</translation>
     </message>
 </context>
 <context>

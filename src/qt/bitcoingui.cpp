@@ -201,7 +201,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
     if (!fUseBlackTheme) {
-        progressBarLabel->setStyleSheet("QLabel { color: #ffffff; }");
+        progressBarLabel->setStyleSheet("QLabel { color: #000000; }");
     } else {
         progressBarLabel->setStyleSheet("QLabel { color: #ffffff; background-color: #404040; }");
     }
@@ -410,9 +410,9 @@ void BitcoinGUI::createToolBars()
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
     toolbar->setObjectName("tabs");
-    //toolbar->setStyleSheet("QToolButton { color: #ffffff; } QToolButton:hover { background-color: #3CB0E8 } QToolButton:checked { background-color: #164356 } QToolButton:pressed { background-color: #164356 } #tabs { color: #ffffff; background-color: qradialgradient(cx: -0.8, cy: 0, fx: -0.8, fy: 0, radius: 0.6, stop: 0 #404040, stop: 1 #101010);  }");
+    //toolbar->setStyleSheet("QToolButton { color: #101010; } QToolButton:hover { background-color: ##e0373f } QToolButton:checked { background-color: #c51f26 } QToolButton:pressed { background-color: none } #tabs { color: #101010; background-color: #f9f9f9);  }");
 
-	QString toolBarStyle = "QToolButton { color: #0382ab; ";
+	QString toolBarStyle = "QToolButton { color: #101010; ";
 
     if (!fUseBlackTheme) {
         toolBarStyle += "border: 2px solid rgba(255,255,255,0);";
@@ -420,11 +420,12 @@ void BitcoinGUI::createToolBars()
         toolBarStyle += "border: 2px solid rgb(30,32,36);";
     }
 
-    toolBarStyle += " } QToolButton:hover { background-color: #3CB0E8; border: 2px solid #3CB0E8; } QToolButton:checked { background-color: #3CB0E8; border: 2px solid #0382ab; color: #ffffff } QToolButton:pressed { background-color: #164356 } #tabs { color: #ffffff; ";
+    toolBarStyle += " } QToolButton:hover { background-color: #afafaf;} QToolButton:checked { background-color: #8c8c8c; } QToolButton:pressed { background-color: none } #tabs { color: #101010; ";
 
     if (!fUseBlackTheme) {
         toolBarStyle += "background-color: #ffffff;";
     } else {
+        toolBarStyle += "background-color: #f9f9f9;";
         //toolBarStyle += "background: rgb(41,44,48);";
     }
     toolBarStyle += "}";
