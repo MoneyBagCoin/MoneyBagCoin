@@ -10,7 +10,10 @@
 #include "ui_interface.h"
 #include "uint256.h"
 #include "version.h"
-
+#include <iostream>
+#include <string>
+#include <stdio.h>
+#include <time.h>
 #include <algorithm>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -95,7 +98,7 @@ bool fServer = false;
 bool fCommandLine = false;
 string strMiscWarning;
 bool fNoListen = false;
-bool fLogTimestamps = false;
+bool fLogTimestamps = true;
 volatile bool fReopenDebugLog = false;
 
 // Init OpenSSL library multithreading support
@@ -276,13 +279,30 @@ bool LogAcceptCategory(const char* category)
     return true;
 }
 
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    return buf;
+}
+
 int LogPrintStr(const std::string &str)
 {
     int ret = 0; // Returns total number of characters written
+    std::stringstream stream;
+    stream << currentDateTime() << " - " << str.data();
+    std::string log = stream.str();
+    
     if (fPrintToConsole)
     {
         // print to console
-        ret = fwrite(str.data(), 1, str.size(), stdout);
+        ret = fwrite(log.data(), 1, log.size(), stdout);
     }
     else if (fPrintToDebugLog)
     {
@@ -302,19 +322,19 @@ int LogPrintStr(const std::string &str)
                 setbuf(fileout, NULL); // unbuffered
         }
 
-        // Debug print useful for profiling
-        if (fLogTimestamps && fStartedNewLine)
-            ret += fprintf(fileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
         if (!str.empty() && str[str.size()-1] == '\n')
             fStartedNewLine = true;
         else
             fStartedNewLine = false;
 
-        ret = fwrite(str.data(), 1, str.size(), fileout);
+
+        ret = fwrite(log.data(), 1, log.size(), fileout);
     }
 
     return ret;
 }
+
+
 
 void ParseString(const string& str, char c, vector<string>& v)
 {
