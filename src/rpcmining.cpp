@@ -523,8 +523,8 @@ Value getblocktemplate(const Array& params, bool fHelp)
     if (vNodes.empty())
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "MoneyBagCoin is not connected!");
 
-    if (IsInitialBlockDownload())
-       throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "MoneyBagCoin is downloading blocks...");
+    //if (IsInitialBlockDownload())
+    //    throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "MoneyBagCoin is downloading blocks...");
 
     if (pindexBest->nHeight >= Params().LastPOWBlock())
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");

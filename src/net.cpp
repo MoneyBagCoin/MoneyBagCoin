@@ -512,7 +512,6 @@ void CNode::copyStats(CNodeStats &stats)
     X(nLastSend);
     X(nLastRecv);
     X(nTimeConnected);
-	//X(nTimeOffset);
     X(addrName);
     X(nVersion);
     X(cleanSubVer);
@@ -1472,7 +1471,7 @@ void ThreadMessageHandler()
 
             // Send messages
             {
-                TRY_LOCK(pnode->cs_vSend, lockSend);
+                TRY_LOCK(pnode->cs_sendProcessing, lockSend);
                 if (lockSend)
                     g_signals.SendMessages(pnode, pnode == pnodeTrickle);
             }

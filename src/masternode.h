@@ -158,6 +158,9 @@ int GetCurrentMasterNode(int mod=1, int64_t nBlockHeight=0, int minProtocol=CMas
 
 int GetMasternodeByVin(CTxIn& vin);
 int GetMasternodeRank(CTxIn& vin, int64_t nBlockHeight=0, int minProtocol=CMasterNode::minProtoVersion);
+
+typedef pair<int, CMasterNode> MasterNodeRank;
+std::vector<MasterNodeRank> GetMasternodeRanks(int64_t nBlockHeight, int minProtocol=0);
 int GetMasternodeByRank(int findRank, int64_t nBlockHeight=0, int minProtocol=CMasterNode::minProtoVersion);
 
 

@@ -64,8 +64,10 @@
 #include <QScrollArea>
 #include <QScroller>
 #include <QTextDocument>
+#include <QtConcurrent/QtConcurrent>
 
 #include <iostream>
+#include <string>
 
 extern bool fOnlyTor;
 extern CWallet* pwalletMain;
@@ -119,6 +121,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Create tabs
     overviewPage = new OverviewPage();
+    overviewPage->setContentsMargins(0, 0, 0, 0);
    
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -190,13 +193,18 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     if (GetBoolArg("-staking", true))
     {
         QTimer *timerStakingIcon = new QTimer(labelStakingIcon);
-        connect(timerStakingIcon, SIGNAL(timeout()), this, SLOT(updateStakingIcon()));
+        connect(timerStakingIcon, SIGNAL(timeout()), this, SLOT(updateStakingIconConc()));
         timerStakingIcon->start(20 * 1000);
         updateStakingIcon();
     }
 
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
+    if (!fUseBlackTheme) {
+        progressBarLabel->setStyleSheet("QLabel { color: #000000; }");
+    } else {
+        progressBarLabel->setStyleSheet("QLabel { color: #ffffff; background-color: #404040; }");
+    }
     progressBarLabel->setVisible(false);
     progressBar = new QProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
@@ -402,14 +410,36 @@ void BitcoinGUI::createToolBars()
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
     toolbar->setObjectName("tabs");
-    toolbar->setStyleSheet("QToolButton { color: #101010; } QToolButton:hover { background-color: ##e0373f } QToolButton:checked { background-color: #c51f26 } QToolButton:pressed { background-color: none } #tabs { color: #101010; background-color: #f9f9f9);  }");
+    //toolbar->setStyleSheet("QToolButton { color: #101010; } QToolButton:hover { background-color: ##e0373f } QToolButton:checked { background-color: #c51f26 } QToolButton:pressed { background-color: none } #tabs { color: #101010; background-color: #f9f9f9);  }");
+
+	QString toolBarStyle = "QToolButton { color: #101010; ";
+
+    if (!fUseBlackTheme) {
+        toolBarStyle += "border: 2px solid rgba(255,255,255,0);";
+    } else {
+        toolBarStyle += "border: 2px solid rgb(30,32,36);";
+    }
+
+    toolBarStyle += " } QToolButton:hover { background-color: #afafaf;} QToolButton:checked { background-color: #8c8c8c; } QToolButton:pressed { background-color: none } #tabs { color: #101010; ";
+
+    if (!fUseBlackTheme) {
+        toolBarStyle += "background-color: #ffffff;";
+    } else {
+        toolBarStyle += "background-color: #f9f9f9;";
+        //toolBarStyle += "background: rgb(41,44,48);";
+    }
+    toolBarStyle += "}";
+    toolbar->setStyleSheet(toolBarStyle);
 
     QLabel* header = new QLabel();
     header->setMinimumSize(128, 128);
     header->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    header->setPixmap(QPixmap(":/icons/bitcoin"));
+    header->setPixmap(QPixmap(":/images/header"));
     header->setMaximumSize(180,180);
     header->setScaledContents(true);
+    if (fUseBlackTheme) {
+        header->setStyleSheet("QLabel { background: none }");
+    }
     toolbar->addWidget(header);
 
     //QMenu *toolbarMenu = new QMenu();
@@ -425,10 +455,12 @@ void BitcoinGUI::createToolBars()
     toolbar->addWidget(spacer);
     toolbar->setOrientation(Qt::Vertical);
     toolbar->setMovable(false);
-    for(int i=0;i<toolbar->layout()->count();i++){
-        toolbar->layout()->itemAt(i)->setAlignment(Qt::AlignLeft);
-    }
+
     addToolBar(Qt::LeftToolBarArea, toolbar);
+
+    foreach(QAction *action, toolbar->actions()) {
+        toolbar->widgetForAction(action)->setFixedWidth(180);
+    }
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -459,7 +491,7 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
         connect(clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
         setNumBlocks(clientModel->getNumBlocks());
-        connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
+        connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocksConc(int)));
 
         // Receive and report messages from network/worker thread
         connect(clientModel, SIGNAL(message(QString,QString,bool,unsigned int)), this, SLOT(message(QString,QString,bool,unsigned int)));
@@ -596,16 +628,22 @@ void BitcoinGUI::setNumConnections(int count)
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to MoneyBagCoin network", "", count));
 }
 
+void BitcoinGUI::setNumBlocksConc(int count) {
+    QtConcurrent::run(this,&BitcoinGUI::setNumBlocks, count);
+}
+
 void BitcoinGUI::setNumBlocks(int count)
 {
-    QString tooltip;
-
     QDateTime lastBlockDate = clientModel->getLastBlockDate();
     QDateTime currentDate = QDateTime::currentDateTime();
     int totalSecs = GetTime() - Params().GenesisBlock().GetBlockTime();
     int secs = lastBlockDate.secsTo(currentDate);
 
-    tooltip = tr("Processed %1 blocks of transaction history.").arg(count);
+    QMetaObject::invokeMethod(this, "updateNumBlocks", Qt::QueuedConnection, Q_ARG(int, count), Q_ARG(int, totalSecs), Q_ARG(int, secs));
+}
+
+void BitcoinGUI::updateNumBlocks(int count, int totalSecs, int secs) {
+    QString tooltip = tr("Processed %1 blocks of transaction history.").arg(count);
 
     // Set icon state: spinning if catching up, tick otherwise
     if(secs < 90*60)
@@ -1112,11 +1150,15 @@ void BitcoinGUI::updateWeight()
     nWeight = pwalletMain->GetStakeWeight();
 }
 
+void BitcoinGUI::updateStakingIconConc() {
+    QtConcurrent::run(this,&BitcoinGUI::updateStakingIcon);
+}
+
 void BitcoinGUI::updateStakingIcon()
 {
     updateWeight();
 
-    if (nLastCoinStakeSearchInterval && nWeight)
+    if (nLastCoinStakeSearchInterval && nWeight && (!overviewPage->getOutOfSyncWarning()))
     {
         uint64_t nWeight = this->nWeight;
         uint64_t nNetworkWeight = GetPoSKernelPS();
@@ -1153,7 +1195,7 @@ void BitcoinGUI::updateStakingIcon()
             labelStakingIcon->setToolTip(tr("Not staking because wallet is locked"));
         else if (vNodes.empty())
             labelStakingIcon->setToolTip(tr("Not staking because wallet is offline"));
-        else if (IsInitialBlockDownload())
+        else if (IsInitialBlockDownload() || overviewPage->getOutOfSyncWarning())
             labelStakingIcon->setToolTip(tr("Not staking because wallet is syncing"));
         else if (!nWeight)
             labelStakingIcon->setToolTip(tr("Not staking because you don't have mature coins"));
