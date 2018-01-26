@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QDebug>
+#include <QtConcurrent/QtConcurrent>
 
 static const int64_t nClientStartupTime = GetTime();
 
@@ -72,6 +73,7 @@ QDateTime ClientModel::getLastBlockDate() const
 
 void ClientModel::updateTimer()
 {
+    /*
     // Get required lock upfront. This avoids the GUI from getting stuck on
     // periodical polls if the core is holding the locks for a longer time -
     // for example, during a wallet rescan.
@@ -86,6 +88,24 @@ void ClientModel::updateTimer()
     {
         cachedNumBlocks = newNumBlocks;
 
+        emit numBlocksChanged(newNumBlocks);
+    }
+
+    emit bytesChanged(getTotalBytesRecv(), getTotalBytesSent());
+    */
+
+    if (syncUpdatedFuture.isFinished()) {
+        syncUpdatedFuture = QtConcurrent::run(this, &ClientModel::updateSyncStatus);
+    }
+}
+
+void ClientModel::updateSyncStatus() {
+    LOCK(cs_main);
+
+    int newNumBlocks = getNumBlocks();
+    if(cachedNumBlocks != newNumBlocks)
+    {
+        cachedNumBlocks = newNumBlocks;
         emit numBlocksChanged(newNumBlocks);
     }
 

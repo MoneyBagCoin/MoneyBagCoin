@@ -6,7 +6,7 @@
 #include "util.h"
 #include "addrman.h"
 #include <boost/lexical_cast.hpp>
-//tt
+
 
 int CMasterNode::minProtoVersion = MIN_MN_PROTO_VERSION;
 
@@ -393,6 +393,14 @@ struct CompareValueOnly2
         return t1.first < t2.first;
     }
 };
+struct CompareValueOnlyMN
+{
+    bool operator()(const pair<int64_t, CMasterNode>& t1,
+                    const pair<int64_t, CMasterNode>& t2) const
+    {
+        return t1.first < t2.first;
+    }
+};
 
 int CountMasternodesAboveProtocol(int protocolVersion)
 {
@@ -555,6 +563,43 @@ bool GetBlockHash(uint256& hash, int nBlockHeight)
     }
 
     return false;
+}
+
+std::vector<MasterNodeRank> GetMasternodeRanks(int64_t nBlockHeight, int minProtocol)
+{
+    std::vector<pair<unsigned int, CMasterNode> > vecMasternodeScores;
+    std::vector<pair<int, CMasterNode> > vecMasternodeRanks;
+
+    //make sure we know about this block
+    uint256 hash = 0;
+    if(!GetBlockHash(hash, nBlockHeight)) return vecMasternodeRanks;
+
+    // scan for winner
+    BOOST_FOREACH(CMasterNode& mn, vecMasternodes) {
+
+        mn.Check();
+
+        if(mn.protocolVersion < minProtocol) continue;
+        if(!mn.IsEnabled()) {
+            continue;
+        }
+
+        uint256 n = mn.CalculateScore(1, nBlockHeight);
+        unsigned int n2 = 0;
+        memcpy(&n2, &n, sizeof(n2));
+
+        vecMasternodeScores.push_back(make_pair(n2, mn));
+    }
+
+    sort(vecMasternodeScores.rbegin(), vecMasternodeScores.rend(), CompareValueOnlyMN());
+
+    int rank = 0;
+    BOOST_FOREACH (PAIRTYPE(unsigned int, CMasterNode)& s, vecMasternodeScores){
+        rank++;
+        vecMasternodeRanks.push_back(make_pair(rank, s.second));
+    }
+
+    return vecMasternodeRanks;
 }
 
 //

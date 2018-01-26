@@ -13,6 +13,7 @@
 #include "ui_interface.h"
 #include "checkpoints.h"
 #include "activemasternode.h"
+#include "masternodeconfig.h"
 #include "spork.h"
 #include "smessage.h"
 
@@ -48,7 +49,7 @@ unsigned int nMinerSleep;
 bool fUseFastIndex;
 bool fOnlyTor = false;
 
-//enum Checkpoints::CPMode CheckpointsMode;
+enum Checkpoints::CPMode CheckpointsMode;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -364,7 +365,7 @@ bool AppInit2(boost::thread_group& threadGroup)
     fUseFastIndex = GetBoolArg("-fastindex", true);
     nMinerSleep = GetArg("-minersleep", 500);
 
-    /*CheckpointsMode = Checkpoints::STRICT;
+    CheckpointsMode = Checkpoints::STRICT;
     std::string strCpMode = GetArg("-cppolicy", "strict");
 
     if(strCpMode == "strict")
@@ -374,7 +375,7 @@ bool AppInit2(boost::thread_group& threadGroup)
         CheckpointsMode = Checkpoints::ADVISORY;
 
     if(strCpMode == "permissive")
-        CheckpointsMode = Checkpoints::PERMISSIVE;*/
+        CheckpointsMode = Checkpoints::PERMISSIVE;
 
     nDerivationMethodIndex = 0;
 
@@ -393,6 +394,9 @@ bool AppInit2(boost::thread_group& threadGroup)
         if (SoftSetBoolArg("-listen", true))
             LogPrintf("AppInit2 : parameter interaction: -bind set -> setting -listen=1\n");
     }
+
+    // Process masternode config
+    masternodeConfig.read(GetMasternodeConfigFile());
 
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0) {
         // when only connecting to trusted nodes, do not seed via DNS, or listen by default
@@ -695,11 +699,11 @@ bool AppInit2(boost::thread_group& threadGroup)
     }
 #endif
 
-    /*if (mapArgs.count("-checkpointkey")) //   checkpoint master priv key
+    if (mapArgs.count("-checkpointkey")) // ppcoin: checkpoint master priv key
     {
         if (!Checkpoints::SetCheckpointPrivKey(GetArg("-checkpointkey", "")))
             InitError(_("Unable to sign checkpoint, wrong checkpointkey?\n"));
-    }*/
+    }
 
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);

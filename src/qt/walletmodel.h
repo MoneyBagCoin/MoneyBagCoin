@@ -57,7 +57,7 @@ public:
         TransactionCommitFailed,
         NarrationTooLong,
         Aborted,
-	    AnonymizeOnlyUnlocked
+	AnonymizeOnlyUnlocked
     };
 
     enum EncryptionStatus
@@ -65,7 +65,7 @@ public:
         Unencrypted,  // !wallet->IsCrypted()
         Locked,       // wallet->IsCrypted() && wallet->IsLocked()
         Unlocked,      // wallet->IsCrypted() && !wallet->IsLocked()
-	    UnlockedForAnonymizationOnly
+	UnlockedForAnonymizationOnly
     };
 
     OptionsModel *getOptionsModel();
@@ -139,7 +139,8 @@ public:
 
 private:
     CWallet *wallet;
-
+	bool fForceCheckBalanceChanged;
+	
     // Wallet has an options model for wallet-specific options
     // (transaction fee, for example)
     OptionsModel *optionsModel;

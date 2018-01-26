@@ -41,6 +41,9 @@ public:
     void setOptionsModel(OptionsModel *optionsModel);
     const QString &getReturnValue() const { return returnValue; }
 
+private:
+    void addQrCodeGuiElements();
+
 public slots:
     void done(int retval);
     void exportClicked();

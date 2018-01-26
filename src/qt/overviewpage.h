@@ -29,9 +29,10 @@ public:
     void setWalletModel(WalletModel *walletModel);
     void showOutOfSyncWarning(bool fShow);
     void updateDarksendProgress();
+	bool getOutOfSyncWarning(void);
 
 public slots:
-    void darkSendStatus();
+    void darkSendStatusConc();
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance, qint64 anonymizedBalance);
 
 signals:
@@ -55,6 +56,9 @@ private:
     int cachedNumBlocks;
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
+	
+	bool is_out_of_sync;
+    void darkSendStatus();
 
 private slots:
     void toggleDarksend();

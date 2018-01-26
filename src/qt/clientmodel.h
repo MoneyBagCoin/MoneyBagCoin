@@ -2,6 +2,7 @@
 #define CLIENTMODEL_H
 
 #include <QObject>
+#include <QFuture>
 
 class OptionsModel;
 class AddressTableModel;
@@ -56,9 +57,13 @@ private:
     int numBlocksAtStartup;
 
     QTimer *pollTimer;
+    QFuture<void> syncUpdatedFuture;
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
+
+private slots:
+    void updateSyncStatus();
 
 signals:
     void numConnectionsChanged(int count);
