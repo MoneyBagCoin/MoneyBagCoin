@@ -22,18 +22,9 @@
 FROM ubuntu:16.04
 
 # Build essentials
-RUN apt-get update && apt-get -y install git vim build-essential g++ libdb++-dev libminiupnpc-dev libtool automake autotools-dev \
-    autoconf pkg-config libssl-dev libgmp3-dev \
-    libevent-dev bsdmainutils libboost-all-dev \
-    apt-transport-https ca-certificates curl gnupg2 \
-    software-properties-common
+RUN apt-get install git build-essential libboost1.58-all-dev libssl-dev libdb5.3++-dev libminiupnpc-dev
 
-# Berkeley DB 4.8
-RUN echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" | tee /etc/apt/sources.list.d/bitcoin-ppa.list
-RUN apt-get update
-RUN apt-get -y --allow-unauthenticated install libdb4.8-dev libdb4.8++-dev
-
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean
 
 RUN git clone https://github.com/MoneyBagCoin/MoneyBagCoin.git MoneyBagCoin && cd MoneyBagCoin/src/ && make -f makefile.unix && cp moneybagcoind /usr/local/sbin/moneybagcoind
 
