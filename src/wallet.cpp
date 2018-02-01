@@ -237,10 +237,10 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool anonymizeOnly
 bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)
 {
     bool fWasLocked = IsLocked();
-
-    SecureString strOldWalletPassphraseFinal;
+    
+    SecureString strOldWalletPassphraseFinal;    
     strOldWalletPassphraseFinal = strOldWalletPassphrase;
-
+    
     {
         LOCK(cs_wallet);
         Lock();
@@ -1426,14 +1426,13 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
             for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
                 bool found = false;
                 if(coin_type == ONLY_DENOMINATED) {
-                    //should make this a vector
-
                     found = IsDenominatedAmount(pcoin->vout[i].nValue);
-                } else if(coin_type == ONLY_NONDENOMINATED || coin_type == ONLY_NONDENOMINATED_NOTMN) {
-                    found = true;
+                } else if(coin_type == ONLY_NONDENOMINATED) {
+                    found = !(fMasterNode && pcoin->vout[i].nValue == GetMNCollateral()*COIN);
+                } else if (coin_type == ONLY_NONDENOMINATED_NOTMN){
                     if (IsCollateralAmount(pcoin->vout[i].nValue)) continue; // do not use collateral amounts
                     found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                    if(found && coin_type == ONLY_NONDENOMINATED_NOTMN) found = (pcoin->vout[i].nValue != 30000*COIN); // do not use MN funds
+                    if(found && fMasterNode) found = pcoin->vout[i].nValue != GetMNCollateral()*COIN; // do not use Hot MN funds
                 } else {
                     found = true;
                 }
@@ -1441,12 +1440,6 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
 
 				//isminetype mine = IsMine(pcoin->vout[i]);
 		bool mine = IsMine(pcoin->vout[i]);
-
-                //if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO &&
-                //    !IsLockedCoin((*it).first, i) && pcoin->vout[i].nValue > 0 &&
-                //    (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
-                //        vCoins.push_back(COutput(pcoin, i, nDepth, (mine & ISMINE_SPENDABLE) != ISMINE_NO));
-		//if (!(IsSpent(wtxid, i)) && mine &&
 		if (!(pcoin->IsSpent(i)) && mine &&
                     !IsLockedCoin((*it).first, i) && pcoin->vout[i].nValue > 0 &&
                     (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
@@ -1500,7 +1493,7 @@ void CWallet::AvailableCoinsMN(vector<COutput>& vCoins, bool fOnlyConfirmed, con
                     found = true;
                     if (IsCollateralAmount(pcoin->vout[i].nValue)) continue; // do not use collateral amounts
                     found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                    if(found && coin_type == ONLY_NONDENOMINATED_NOTMN) found = (pcoin->vout[i].nValue != 30000*COIN); // do not use MN funds
+                    if(found && coin_type == ONLY_NONDENOMINATED_NOTMN) found = (pcoin->vout[i].nValue != GetMNCollateral()*COIN); // do not use MN funds
                 } else {
                     found = true;
                 }
@@ -1508,12 +1501,6 @@ void CWallet::AvailableCoinsMN(vector<COutput>& vCoins, bool fOnlyConfirmed, con
 
 				//isminetype mine = IsMine(pcoin->vout[i]);
 		bool mine = IsMine(pcoin->vout[i]);
-
-                //if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO &&
-                //    !IsLockedCoin((*it).first, i) && pcoin->vout[i].nValue > 0 &&
-                //    (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
-                //        vCoins.push_back(COutput(pcoin, i, nDepth, (mine & ISMINE_SPENDABLE) != ISMINE_NO));
-		//if (!(IsSpent(wtxid, i)) && mine &&
 		if (!(pcoin->IsSpent(i)) &&
                     !IsLockedCoin((*it).first, i) && pcoin->vout[i].nValue > 0 &&
                     (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
@@ -1529,27 +1516,61 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
     {
         LOCK2(cs_main, cs_wallet);
+        int nStakeMinConfirmations = 20;
         for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
         {
             const CWalletTx* pcoin = &(*it).second;
-
-            // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
-            if (pcoin->nTime + nStakeMinAge > nSpendTime)
-                continue;
-
-            if (pcoin->GetBlocksToMaturity() > 0)
-                continue;
 
             int nDepth = pcoin->GetDepthInMainChain();
             if (nDepth < 1)
                 continue;
 
-            for (unsigned int i = 0; i < pcoin->vout.size(); i++)
+            if (nDepth < nStakeMinConfirmations)
+            {
+                continue;
+            }
+            else
+            {
+            // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
+            if (pcoin->nTime + nStakeMinAge > nSpendTime)
+               continue;
+            }
+
+            if (pcoin->GetBlocksToMaturity() > 0)
+                continue;
+
+            bool found = false;
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++){
+                if (IsDenominatedAmount(pcoin->vout[i].nValue)){
+
+                    //LogPrintf("CWallet::AvailableCoinsForStaking - Found denominated amounts.\n");
+                    found = true;
+                    break;
+                }
+                if (pcoin->vout[i].nValue == GetMNCollateral()*COIN){
+
+                    //LogPrintf("CWallet::AvailableCoinsForStaking - Found Masternode collateral.\n");
+                    found = true;
+                    break;
+                }
+                if (IsCollateralAmount(pcoin->vout[i].nValue)){
+
+                    //LogPrintf("CWallet::AvailableCoinsForStaking - Found Collateral amount.\n");
+                    found = true;
+                    break;
+                }
+            }
+
+            if(found) continue;
+
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
                 if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
                     vCoins.push_back(COutput(pcoin, i, nDepth, true));
+            }
         }
     }
 }
+
 
 static void ApproximateBestSubset(vector<pair<int64_t, pair<const CWalletTx*,unsigned int> > >vValue, int64_t nTotalLower, int64_t nTargetValue,
                                   vector<char>& vfBest, int64_t& nBest, int iterations = 1000)
@@ -2137,7 +2158,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, int64_t nValueMin, int64_t 
     {
         //there's no reason to allow inputs less than 1 COIN into DS (other than denominations smaller than that amount)
         if(out.tx->vout[out.i].nValue < 1*COIN && out.tx->vout[out.i].nValue != (.1*COIN)+100) continue;
-        if(fMasterNode && out.tx->vout[out.i].nValue == 30000*COIN) continue; //masternode input
+        if(fMasterNode && out.tx->vout[out.i].nValue == GetMNCollateral()*COIN) continue; //masternode input
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
             bool fAccepted = false;
 
@@ -2213,7 +2234,7 @@ bool CWallet::SelectCoinsDark(int64_t nValueMin, int64_t nValueMax, std::vector<
     {
         //there's no reason to allow inputs less than 1 COIN into DS (other than denominations smaller than that amount)
         if(out.tx->vout[out.i].nValue < 1*COIN && out.tx->vout[out.i].nValue != (.1*COIN)+100) continue;
-        if(fMasterNode && out.tx->vout[out.i].nValue == 30000*COIN) continue; //masternode input
+        if(fMasterNode && out.tx->vout[out.i].nValue == GetMNCollateral()*COIN) continue; //masternode input
 
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
             CTxIn vin = CTxIn(out.tx->GetHash(),out.i);
@@ -2552,28 +2573,28 @@ bool CWallet::CreateTransaction(CScript scriptPubKey, int64_t nValue, std::strin
 {
     vector< pair<CScript, int64_t> > vecSend;
     vecSend.push_back(make_pair(scriptPubKey, nValue));
-
+    
     if (sNarr.length() > 0)
     {
         std::vector<uint8_t> vNarr(sNarr.c_str(), sNarr.c_str() + sNarr.length());
         std::vector<uint8_t> vNDesc;
-
+        
         vNDesc.resize(2);
         vNDesc[0] = 'n';
         vNDesc[1] = 'p';
-
+        
         CScript scriptN = CScript() << OP_RETURN << vNDesc << OP_RETURN << vNarr;
-
+        
         vecSend.push_back(make_pair(scriptN, 0));
     }
-
+    
     // -- CreateTransaction won't place change between value and narr output.
     //    narration output will be for preceding output
-
+    
     int nChangePos;
     std::string strFailReason;
     bool rv = CreateTransaction(vecSend, wtxNew, reservekey, nFeeRet, nChangePos, strFailReason, coinControl);
-
+    
     // -- narration will be added to mapValue later in FindStealthTransactions From CommitTransaction
     return rv;
 }
@@ -2583,7 +2604,7 @@ bool CWallet::NewStealthAddress(std::string& sError, std::string& sLabel, CSteal
 {
     ec_secret scan_secret;
     ec_secret spend_secret;
-
+    
     if (GenerateRandomSecret(scan_secret) != 0
         || GenerateRandomSecret(spend_secret) != 0)
     {
@@ -2591,7 +2612,7 @@ bool CWallet::NewStealthAddress(std::string& sError, std::string& sLabel, CSteal
         printf("Error CWallet::NewStealthAddress - %s\n", sError.c_str());
         return false;
     };
-
+    
     ec_point scan_pubkey, spend_pubkey;
     if (SecretToPublicKey(scan_secret, scan_pubkey) != 0)
     {
@@ -2599,14 +2620,14 @@ bool CWallet::NewStealthAddress(std::string& sError, std::string& sLabel, CSteal
         printf("Error CWallet::NewStealthAddress - %s\n", sError.c_str());
         return false;
     };
-
+    
     if (SecretToPublicKey(spend_secret, spend_pubkey) != 0)
     {
         sError = "Could not get spend public key.";
         printf("Error CWallet::NewStealthAddress - %s\n", sError.c_str());
         return false;
     };
-
+    
     if (fDebug)
     {
         printf("getnewstealthaddress: ");
@@ -2614,37 +2635,37 @@ bool CWallet::NewStealthAddress(std::string& sError, std::string& sLabel, CSteal
         for (uint32_t i = 0; i < scan_pubkey.size(); ++i)
           printf("%02x", scan_pubkey[i]);
         printf("\n");
-
+        
         printf("spend_pubkey ");
         for (uint32_t i = 0; i < spend_pubkey.size(); ++i)
           printf("%02x", spend_pubkey[i]);
         printf("\n");
     };
-
-
+    
+    
     sxAddr.label = sLabel;
     sxAddr.scan_pubkey = scan_pubkey;
     sxAddr.spend_pubkey = spend_pubkey;
-
+    
     sxAddr.scan_secret.resize(32);
     memcpy(&sxAddr.scan_secret[0], &scan_secret.e[0], 32);
     sxAddr.spend_secret.resize(32);
     memcpy(&sxAddr.spend_secret[0], &spend_secret.e[0], 32);
-
+    
     return true;
 }
 
 bool CWallet::AddStealthAddress(CStealthAddress& sxAddr)
 {
     LOCK(cs_wallet);
-
+    
     // must add before changing spend_secret
     stealthAddresses.insert(sxAddr);
-
+    
     bool fOwned = sxAddr.scan_secret.size() == ec_secret_size;
-
-
-
+    
+    
+    
     if (fOwned)
     {
         // -- owned addresses can only be added when wallet is unlocked
@@ -2654,14 +2675,14 @@ bool CWallet::AddStealthAddress(CStealthAddress& sxAddr)
             stealthAddresses.erase(sxAddr);
             return false;
         };
-
+        
         if (IsCrypted())
         {
             std::vector<unsigned char> vchCryptedSecret;
             CSecret vchSecret;
             vchSecret.resize(32);
             memcpy(&vchSecret[0], &sxAddr.spend_secret[0], 32);
-
+            
             uint256 iv = Hash(sxAddr.spend_pubkey.begin(), sxAddr.spend_pubkey.end());
             if (!EncryptSecret(vMasterKey, vchSecret, iv, vchCryptedSecret))
             {
@@ -2672,13 +2693,13 @@ bool CWallet::AddStealthAddress(CStealthAddress& sxAddr)
             sxAddr.spend_secret = vchCryptedSecret;
         };
     };
-
-
+    
+    
     bool rv = CWalletDB(strWalletFile).WriteStealthAddress(sxAddr);
-
+    
     if (rv)
         NotifyAddressBookChanged(this, sxAddr, sxAddr.label, fOwned, CT_NEW);
-
+    
     return rv;
 }
 
@@ -2690,13 +2711,13 @@ bool CWallet::UnlockStealthAddresses(const CKeyingMaterial& vMasterKeyIn)
     {
         if (it->scan_secret.size() < 32)
             continue; // stealth address is not owned
-
+        
         // -- CStealthAddress are only sorted on spend_pubkey
         CStealthAddress &sxAddr = const_cast<CStealthAddress&>(*it);
-
+        
         if (fDebug)
             printf("Decrypting stealth key %s\n", sxAddr.Encoded().c_str());
-
+        
         CSecret vchSecret;
         uint256 iv = Hash(sxAddr.spend_pubkey.begin(), sxAddr.spend_pubkey.end());
         if(!DecryptSecret(vMasterKeyIn, sxAddr.spend_secret, iv, vchSecret)
@@ -2705,22 +2726,22 @@ bool CWallet::UnlockStealthAddresses(const CKeyingMaterial& vMasterKeyIn)
             printf("Error: Failed decrypting stealth key %s\n", sxAddr.Encoded().c_str());
             continue;
         };
-
+        
         ec_secret testSecret;
         memcpy(&testSecret.e[0], &vchSecret[0], 32);
         ec_point pkSpendTest;
-
+        
         if (SecretToPublicKey(testSecret, pkSpendTest) != 0
             || pkSpendTest != sxAddr.spend_pubkey)
         {
             printf("Error: Failed decrypting stealth key, public key mismatch %s\n", sxAddr.Encoded().c_str());
             continue;
         };
-
+        
         sxAddr.spend_secret.resize(32);
         memcpy(&sxAddr.spend_secret[0], &vchSecret[0], 32);
     };
-
+    
     CryptedKeyMap::iterator mi = mapCryptedKeys.begin();
     for (; mi != mapCryptedKeys.end(); ++mi)
     {
@@ -2728,36 +2749,36 @@ bool CWallet::UnlockStealthAddresses(const CKeyingMaterial& vMasterKeyIn)
         std::vector<unsigned char> &vchCryptedSecret = (*mi).second.second;
         if (vchCryptedSecret.size() != 0)
             continue;
-
+        
         CKeyID ckid = pubKey.GetID();
         CBitcoinAddress addr(ckid);
-
+        
         StealthKeyMetaMap::iterator mi = mapStealthKeyMeta.find(ckid);
         if (mi == mapStealthKeyMeta.end())
         {
             printf("Error: No metadata found to add secret for %s\n", addr.ToString().c_str());
             continue;
         };
-
+        
         CStealthKeyMetadata& sxKeyMeta = mi->second;
-
+        
         CStealthAddress sxFind;
         sxFind.scan_pubkey = sxKeyMeta.pkScan.Raw();
-
+        
         std::set<CStealthAddress>::iterator si = stealthAddresses.find(sxFind);
         if (si == stealthAddresses.end())
         {
             printf("No stealth key found to add secret for %s\n", addr.ToString().c_str());
             continue;
         };
-
+        
         if (fDebug)
             printf("Expanding secret for %s\n", addr.ToString().c_str());
-
+        
         ec_secret sSpendR;
         ec_secret sSpend;
         ec_secret sScan;
-
+        
         if (si->spend_secret.size() != ec_secret_size
             || si->scan_secret.size() != ec_secret_size)
         {

@@ -495,5 +495,3 @@ void SetBlackThemeQSS(QApplication& app)
 
 } // namespace GUIUtil
 
-//QPushButton    { background: rgb(224,55,63); //red color
-//QToolButton:checked: rgb(224,55,63); //red color

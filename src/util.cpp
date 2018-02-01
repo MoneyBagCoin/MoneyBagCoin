@@ -10,7 +10,10 @@
 #include "ui_interface.h"
 #include "uint256.h"
 #include "version.h"
-
+#include <iostream>
+#include <string>
+#include <stdio.h>
+#include <time.h>
 #include <algorithm>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -95,7 +98,7 @@ bool fServer = false;
 bool fCommandLine = false;
 string strMiscWarning;
 bool fNoListen = false;
-bool fLogTimestamps = false;
+bool fLogTimestamps = true;
 volatile bool fReopenDebugLog = false;
 
 // Init OpenSSL library multithreading support
@@ -276,13 +279,30 @@ bool LogAcceptCategory(const char* category)
     return true;
 }
 
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    return buf;
+}
+
 int LogPrintStr(const std::string &str)
 {
     int ret = 0; // Returns total number of characters written
+    std::stringstream stream;
+    stream << currentDateTime() << " - " << str.data();
+    std::string log = stream.str();
+    
     if (fPrintToConsole)
     {
         // print to console
-        ret = fwrite(str.data(), 1, str.size(), stdout);
+        ret = fwrite(log.data(), 1, log.size(), stdout);
     }
     else if (fPrintToDebugLog)
     {
@@ -302,19 +322,19 @@ int LogPrintStr(const std::string &str)
                 setbuf(fileout, NULL); // unbuffered
         }
 
-        // Debug print useful for profiling
-        if (fLogTimestamps && fStartedNewLine)
-            ret += fprintf(fileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
         if (!str.empty() && str[str.size()-1] == '\n')
             fStartedNewLine = true;
         else
             fStartedNewLine = false;
 
-        ret = fwrite(str.data(), 1, str.size(), fileout);
+
+        ret = fwrite(log.data(), 1, log.size(), fileout);
     }
 
     return ret;
 }
+
+
 
 void ParseString(const string& str, char c, vector<string>& v)
 {
@@ -1139,6 +1159,67 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
     return path;
 }
 
+string randomStrGen(int length) {
+    static string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    string result;
+    result.resize(length);
+    for (int32_t i = 0; i < length; i++)
+        result[i] = charset[rand() % charset.length()];
+
+    return result;
+}
+
+void createConf()       //Automatic MoneyBagCoin.conf generation
+{
+    srand(time(NULL));
+
+    ofstream pConf;
+    pConf.open(GetConfigFile().generic_string().c_str());
+    const char* nodes =  "\nport=43210"
+                        "\nrpcallowip=127.0.0.1"
+                        "\ndaemon=1"
+                        "\nserver=1"
+                        "\naddnode=1.33.247.11:41913"
+                        "\naddnode=103.1.239.208:43210"
+                        "\naddnode=103.199.53.58:8865"
+                        "\naddnode=103.71.237.15:24588"
+                        "\naddnode=104.155.199.216:60906"
+                        "\naddnode=104.227.146.253:51510"
+                        "\naddnode=104.237.196.98:28878"
+                        "\naddnode=105.212.61.42:58592"
+                        "\naddnode=108.27.238.28:57486"
+                        "\naddnode=109.248.46.56:52821"
+                        "\naddnode=109.60.214.146:54039"
+                        "\naddnode=113.190.122.28:50564"
+                        "\naddnode=115.132.163.13:46740"
+                        "\naddnode=115.77.245.105:49239"
+                        "\naddnode=116.100.214.18:53234"
+                        "\naddnode=118.100.186.29:53868"
+                        "\naddnode=118.101.252.102:60833"
+                        "\naddnode=119.28.143.118:56741"
+                        "\naddnode=119.59.115.40:55164"
+                        "\naddnode=119.59.118.101:43210"
+                        "\naddnode=124.120.54.216:54524"
+                        "\naddnode=128.199.72.21:51634"
+                        "\naddnode=138.68.68.149:37458"
+                        "\naddnode=139.192.181.220:61143"
+                        "\naddnode=142.129.108.23:27948"
+                        "\naddnode=151.80.2.241:43210"
+                        "\naddnode=157.97.103.231:43210"
+                        "\naddnode=164.132.164.49:51110"
+                        "\naddnode=165.227.45.122:60242"
+                        "\naddnode=171.244.44.61:54638"
+                         ;
+
+    pConf   << std::string("rpcuser=")
+            +  randomStrGen(5)
+            + std::string("\nrpcpassword=") 
+            + randomStrGen(15)
+            + std::string(nodes);
+
+    pConf.close();
+}
+
 void ClearDatadirCache()
 {
     std::fill(&pathCached[0], &pathCached[CChainParams::MAX_NETWORK_TYPES+1],
@@ -1164,7 +1245,12 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
     if (!streamConfig.good())
-        return; // No bitcoin.conf file is OK
+    {
+        createConf();
+        new(&streamConfig) boost::filesystem::ifstream(GetConfigFile());
+        if(!streamConfig.good())
+            return;
+    }
 
     set<string> setOptions;
     setOptions.insert("*");

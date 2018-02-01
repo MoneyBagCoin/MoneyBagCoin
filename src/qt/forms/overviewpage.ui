@@ -48,6 +48,9 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>

@@ -84,16 +84,10 @@ public:
 
        Call with transaction that was added, removed or changed.
      */
-    void updateWallet(const uint256 &hash, int status)
+    void updateWallet(const uint256 &hash, int status, bool showTransaction)
     {
         qDebug() << "TransactionTablePriv::updateWallet : " + QString::fromStdString(hash.ToString()) + " " + QString::number(status);
         {
-            LOCK2(cs_main, wallet->cs_wallet);
-
-            // Find transaction in wallet
-            std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
-            bool inWallet = mi != wallet->mapWallet.end();
-
             // Find bounds of this transaction in model
             QList<TransactionRecord>::iterator lower = qLowerBound(
                 cachedWallet.begin(), cachedWallet.end(), hash, TxLessThan());
@@ -103,9 +97,6 @@ public:
             int upperIndex = (upper - cachedWallet.begin());
             bool inModel = (lower != upper);
 
-            // Determine whether to show transaction or not
-            bool showTransaction = (inWallet && TransactionRecord::showTransaction(mi->second));
-
             if(status == CT_UPDATED)
             {
                 if(showTransaction && !inModel)
@@ -114,7 +105,7 @@ public:
                     status = CT_DELETED; /* In model, but want to hide, treat as deleted */
             }
 
-            qDebug() << "   inWallet=" + QString::number(inWallet) + " inModel=" + QString::number(inModel) +
+            qDebug() << "    inModel=" + QString::number(inModel) +
                         " Index=" + QString::number(lowerIndex) + "-" + QString::number(upperIndex) +
                         " showTransaction=" + QString::number(showTransaction) + " derivedStatus=" + QString::number(status);
 
@@ -126,13 +117,16 @@ public:
                     qDebug() << "TransactionTablePriv::updateWallet : Warning: Got CT_NEW, but transaction is already in model";
                     break;
                 }
-                if(!inWallet)
-                {
-                    qDebug() << "TransactionTablePriv::updateWallet : Warning: Got CT_NEW, but transaction is not in wallet";
-                    break;
-                }
                 if(showTransaction)
                 {
+                    LOCK2(cs_main, wallet->cs_wallet);
+                    // Find transaction in wallet
+                    std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
+                    if(mi == wallet->mapWallet.end())
+                    {
+                        qWarning() << "TransactionTablePriv::updateWallet: Warning: Got CT_NEW, but transaction is not in wallet";
+                        break;
+                    }
                     // Added -- insert at the right position
                     QList<TransactionRecord> toInsert =
                             TransactionRecord::decomposeTransaction(wallet, mi->second);
@@ -233,19 +227,22 @@ TransactionTableModel::TransactionTableModel(CWallet* wallet, WalletModel *paren
     priv->refreshWallet();
 
     connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
+
+    subscribeToCoreSignals();
 }
 
 TransactionTableModel::~TransactionTableModel()
 {
+    unsubscribeFromCoreSignals();
     delete priv;
 }
 
-void TransactionTableModel::updateTransaction(const QString &hash, int status)
+void TransactionTableModel::updateTransaction(const QString &hash, int status, bool showTransaction)
 {
     uint256 updated;
     updated.SetHex(hash.toStdString());
 
-    priv->updateWallet(updated, status);
+    priv->updateWallet(updated, status, showTransaction);
 }
 
 void TransactionTableModel::updateConfirmations()
@@ -620,4 +617,32 @@ void TransactionTableModel::updateDisplayUnit()
 {
     // emit dataChanged to update Amount column with the current unit
     emit dataChanged(index(0, Amount), index(priv->size()-1, Amount));
+}
+
+static void NotifyTransactionChanged(TransactionTableModel *ttm, CWallet *wallet, const uint256 &hash, ChangeType status) {
+
+    QString strHash = QString::fromStdString(hash.GetHex());
+
+    // Find transaction in wallet
+    std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
+    bool inWallet = mi != wallet->mapWallet.end();
+    // Determine whether to show transaction or not
+    bool showTransaction = (inWallet && TransactionRecord::showTransaction(mi->second));
+
+    QMetaObject::invokeMethod(ttm, "updateTransaction", Qt::QueuedConnection,
+                              Q_ARG(QString, strHash),
+                              Q_ARG(int, status),
+                              Q_ARG(bool, showTransaction));
+}
+
+void TransactionTableModel::subscribeToCoreSignals()
+{
+    // Connect signals to wallet
+    wallet->NotifyTransactionChanged.connect(boost::bind(NotifyTransactionChanged, this, _1, _2, _3));
+}
+
+void TransactionTableModel::unsubscribeFromCoreSignals()
+{
+    // Disconnect signals from wallet
+    wallet->NotifyTransactionChanged.disconnect(boost::bind(NotifyTransactionChanged, this, _1, _2, _3));
 }
