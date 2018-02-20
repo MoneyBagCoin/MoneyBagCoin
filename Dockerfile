@@ -22,7 +22,7 @@
 FROM ubuntu:16.04
 
 # Build essentials
-RUN apt-get install git build-essential libboost1.58-all-dev libssl-dev libdb5.3++-dev libminiupnpc-dev
+apt-get install git build-essential libboost1.58-all-dev libssl-dev libdb5.3++-dev libminiupnpc-dev
 
 RUN apt-get clean
 
